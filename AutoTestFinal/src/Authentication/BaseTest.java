@@ -11,15 +11,18 @@ import java.time.Duration;
 import java.util.Properties;
 
 public class BaseTest {
-    protected WebDriver driver;
-    protected WebDriverWait wait;
+    protected static WebDriver driver;  // Đổi thành static để chỉ có 1 WebDriver duy nhất
+    protected static WebDriverWait wait;
     protected String validEmail, validPassword;
     protected String invalidEmail, invalidPassword;
 
     public BaseTest() {
-        System.setProperty("webdriver.chrome.driver", "D:\\java-2024-12\\chromedriver-win64\\chromedriver.exe");
-        driver = new ChromeDriver();
-        wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+        if (driver == null) { // Chỉ khởi tạo driver nếu chưa có
+            System.setProperty("webdriver.chrome.driver", "D:\\java-2024-12\\chromedriver-win64\\chromedriver.exe");
+            driver = new ChromeDriver();
+            wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+            driver.manage().window().maximize(); // Đảm bảo trình duyệt full màn hình
+        }
         loadCredentials();
     }
 
@@ -43,7 +46,10 @@ public class BaseTest {
         wait.until(ExpectedConditions.urlContains("login.microsoftonline.com"));
     }
 
-    public void closeBrowser() {
-        driver.quit();
+    public static void closeBrowser() {
+        if (driver != null) {
+            driver.quit();
+            driver = null; // Đặt lại driver để tránh mở lại khi chạy test khác
+        }
     }
 }
